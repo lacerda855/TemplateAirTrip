@@ -9,10 +9,14 @@ import {
   Modal,
   FlatList,
   Image,
+  ActivityIndicator,
+  Alert,
+  Linking,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { useFlightSearch, Flight } from '@/hooks/useFlightSearch';
 
 const airports = [
   { code: 'GIG', city: 'Rio de Janeiro', country: 'RJ' },
@@ -41,6 +45,9 @@ export default function SearchFlightsScreen() {
   const [showAirportModal, setShowAirportModal] = useState(false);
   const [airportModalType, setAirportModalType] = useState('departure');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Hook para busca de voos
+  const { flights, loading, error, searchFlights } = useFlightSearch();
 
   const handleAirportSelect = (airport: any) => {
     if (airportModalType === 'departure') {
@@ -74,6 +81,24 @@ export default function SearchFlightsScreen() {
       month: '2-digit',
       year: 'numeric',
     });
+  };
+
+  // Função para buscar voos
+  const handleSearch = async () => {
+    if (!departure || !arrival) {
+      Alert.alert('Erro', 'Selecione origem e destino.');
+      return;
+    }
+
+    const params = {
+      origin: departure.code,
+      destination: arrival.code,
+      departureDate: formatDate(departureDate),
+      returnDate: tripType === 'roundtrip' ? formatDate(returnDate) : undefined,
+      passengers,
+    };
+
+    await searchFlights(params);
   };
 
   return (
@@ -224,16 +249,44 @@ export default function SearchFlightsScreen() {
           </View>
 
           {/* Botão de Busca */}
-          <LinearGradient
-            colors={['#00d4ff', '#4a4fa0']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.searchButton}
-          >
-            <MaterialIcons name="search" size={20} color="#fff" />
-            <Text style={styles.searchButtonText}>Buscar Voos</Text>
-          </LinearGradient>
+          <TouchableOpacity onPress={handleSearch} disabled={loading}>
+            <LinearGradient
+              colors={loading ? ['#ccc', '#999'] : ['#00d4ff', '#4a4fa0']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.searchButton}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <MaterialIcons name="search" size={20} color="#fff" />
+              )}
+              <Text style={styles.searchButtonText}>
+                {loading ? 'Buscando...' : 'Buscar Voos'}
+              </Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </View>
+
+        {/* Resultados da Busca */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <MaterialIcons name="error" size={24} color="#ff4444" />
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        )}
+
+        {flights.length > 0 && (
+          <View style={styles.resultsSection}>
+            <Text style={styles.resultsTitle}>Voos Encontrados ({flights.length})</Text>
+            <FlatList
+              data={flights}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => <FlightCard flight={item} />}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
+        )}
 
         {/* Dicas de Viagem */}
         <View style={styles.tipsSection}>
@@ -297,7 +350,7 @@ export default function SearchFlightsScreen() {
                     onPress={() => handleAirportSelect(item)}
                   >
                     <View style={styles.airportItemContent}>
-                      <Text style={styles.airportCode}>{item.code}</Text>
+                      <Text style={styles.modalAirportCode}>{item.code}</Text>
                       <View>
                         <Text style={styles.airportCity}>{item.city}</Text>
                         <Text style={styles.airportCountry}>{item.country}</Text>
@@ -335,6 +388,59 @@ export default function SearchFlightsScreen() {
     </LinearGradient>
   );
 }
+
+// Componente para cartão de voo
+const FlightCard: React.FC<{ flight: Flight }> = ({ flight }) => {
+  const handleSelectFlight = async () => {
+    if (!flight.url) {
+      Alert.alert('Link indisponível', 'Não foi possível abrir a página do voo.');
+      return;
+    }
+
+    const supported = await Linking.canOpenURL(flight.url);
+    if (supported) {
+      await Linking.openURL(flight.url);
+      return;
+    }
+
+    Alert.alert('Erro', 'Não foi possível abrir o link do voo.');
+  };
+
+  return (
+    <View style={styles.flightCard}>
+      <View style={styles.flightHeader}>
+        <Text style={styles.airline}>{flight.airline}</Text>
+        <Text style={styles.flightNumber}>{flight.flightNumber}</Text>
+      </View>
+
+      <View style={styles.flightRoute}>
+        <View style={styles.routePoint}>
+          <Text style={styles.airportCode}>{flight.departure.airport}</Text>
+          <Text style={styles.time}>{flight.departure.time}</Text>
+        </View>
+
+        <View style={styles.routeLine}>
+          <MaterialIcons name="flight" size={20} color="#00d4ff" />
+          <Text style={styles.duration}>{flight.duration}</Text>
+          {flight.stops > 0 && <Text style={styles.stops}>{flight.stops} parada(s)</Text>}
+        </View>
+
+        <View style={styles.routePoint}>
+          <Text style={styles.airportCode}>{flight.arrival.airport}</Text>
+          <Text style={styles.time}>{flight.arrival.time}</Text>
+        </View>
+      </View>
+
+      <View style={styles.flightFooter}>
+        <Text style={styles.price}>R$ {flight.price.toFixed(2)}</Text>
+        <TouchableOpacity style={styles.selectButton} onPress={handleSelectFlight}>
+          <MaterialCommunityIcons name="open-in-new" size={18} color="#fff" style={styles.openIcon} />
+          <Text style={styles.selectButtonText}>Abrir no site</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -513,8 +619,116 @@ const styles = StyleSheet.create({
     color: '#9ab8d9',
     fontSize: 13,
     flex: 1,
+  },  errorContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(255, 68, 68, 0.1)',
+    borderRadius: 10,
+    padding: 12,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#ff4444',
+    gap: 12,
+    alignItems: 'center',
   },
-  modalOverlay: {
+  errorText: {
+    color: '#ff4444',
+    fontSize: 14,
+    flex: 1,
+  },
+  resultsSection: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  resultsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 12,
+  },
+  flightCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(0, 212, 255, 0.3)',
+  },
+  flightHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  airline: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  flightNumber: {
+    fontSize: 14,
+    color: '#9ab8d9',
+  },
+  flightRoute: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  routePoint: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  airportCode: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#00d4ff',
+  },
+  time: {
+    fontSize: 14,
+    color: '#9ab8d9',
+    marginTop: 4,
+  },
+  routeLine: {
+    alignItems: 'center',
+    flex: 2,
+  },
+  duration: {
+    fontSize: 12,
+    color: '#9ab8d9',
+    marginTop: 4,
+  },
+  stops: {
+    fontSize: 10,
+    color: '#ffaa00',
+    marginTop: 2,
+  },
+  flightFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#00d4ff',
+  },
+  selectButton: {
+    backgroundColor: '#00d4ff',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  selectButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  openIcon: {
+    marginRight: 4,
+  },  modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
@@ -565,7 +779,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 15,
   },
-  airportCode: {
+  modalAirportCode: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#00d4ff',
