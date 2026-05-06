@@ -22,6 +22,8 @@ import { useDrawerStatus } from '@react-navigation/drawer';
 import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import API_URL from './../../conf/api';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '../../constants/Colors';
 
 interface UserData {
   email: string;
@@ -42,6 +44,8 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
 
   const isDrawerOpen = useDrawerStatus();
   const fadeAnim = useState(new Animated.Value(0))[0];
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
 
   // Função para carregar dados do usuário com timestamp
   const loadUserData = async (forceUpdate: boolean = false) => {
@@ -257,11 +261,16 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
     >
       {/* Header com gradiente */}
       <LinearGradient
-        colors={['#A67B5B', '#8B5A2B', '#5C4033']}
+        colors={[theme.primary, theme.surfaceLighter, theme.secondary]}
         style={styles.header}
         start={[0, 0]}
-        end={[1, 1]}
+        end={[1, 0]}
       >
+        <View style={styles.brandHeader}>
+          <Text style={styles.brandName}>AirTrip</Text>
+          <Text style={styles.brandTagline}>Sua jornada começa aqui</Text>
+        </View>
+
         {user && (
           <View style={styles.headerButtons}>
             <TouchableOpacity
@@ -350,6 +359,25 @@ const CustomDrawerContent: React.FC<DrawerContentComponentProps> = (props) => {
         <DrawerItemList {...props} />
       </View>
 
+      <View style={styles.quickActionsContainer}>
+        <Text style={styles.sectionTitle}>Ações rápidas</Text>
+        <View style={styles.quickActionsRow}>
+          <TouchableOpacity style={styles.quickAction} onPress={forcePhotoUpdate}>
+            <MaterialIcons name="sync" size={18} color={theme.secondary} />
+            <Text style={styles.quickActionText}>Atualizar perfil</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.quickAction} onPress={() => props.navigation.closeDrawer()}>
+            <MaterialIcons name="chevron-left" size={18} color={theme.secondary} />
+            <Text style={styles.quickActionText}>Fechar menu</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={styles.footerContainer}>
+        <Text style={styles.footerTitle}>AirTrip</Text>
+        <Text style={styles.footerText}>Conecte-se e organize sua próxima viagem</Text>
+      </View>
+
       {/* Modal para editar nome */}
       <Modal
         visible={modalVisible}
@@ -401,9 +429,27 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#8B5A2B',
-    minHeight: 200,
+    borderBottomColor: 'rgba(255,255,255,0.13)',
+    minHeight: 220,
     justifyContent: 'center',
+  },
+  brandHeader: {
+    position: 'absolute',
+    top: 18,
+    left: 20,
+    right: 20,
+    alignItems: 'flex-start',
+  },
+  brandName: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#FFF',
+    letterSpacing: 0.6,
+  },
+  brandTagline: {
+    marginTop: 4,
+    color: 'rgba(255,255,255,0.85)',
+    fontSize: 12,
   },
   headerButtons: {
     position: 'absolute',
@@ -509,6 +555,61 @@ const styles = StyleSheet.create({
   drawerItemsContainer: {
     flex: 1,
     paddingTop: 10,
+    backgroundColor: '#08163f',
+  },
+  quickActionsContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: '#0f285d',
+    borderRadius: 18,
+    marginHorizontal: 14,
+    marginBottom: 14,
+  },
+  sectionTitle: {
+    color: '#c8e7ff',
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  quickActionsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  quickAction: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  quickActionText: {
+    color: '#FFF',
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  footerContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#08163f',
+  },
+  footerTitle: {
+    color: '#FFF',
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  footerText: {
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 13,
+    lineHeight: 18,
   },
   loader: {
     position: 'absolute',

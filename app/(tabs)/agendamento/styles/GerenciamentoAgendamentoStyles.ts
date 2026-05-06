@@ -9,6 +9,44 @@ export const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  screenHeader: {
+    marginBottom: 16,
+  },
+  screenTitle: {
+    fontSize: 28,
+    fontWeight: '900',
+    color: '#FFF',
+    marginBottom: 8,
+  },
+  screenSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.9)',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 16,
+  },
+  statCard: {
+    flex: 1,
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+  },
+  statNumber: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#FFF',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.75)',
+    marginTop: 6,
+  },
   image: {
     width: 120,
     height: 120,
@@ -52,15 +90,17 @@ export const styles = StyleSheet.create({
 
   // Título
   titleContainer: {
-    backgroundColor: '#A67B5B',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.12)',
+    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
   },
   tableTitle: {
     fontSize: 20,
@@ -85,15 +125,13 @@ export const styles = StyleSheet.create({
   // Cards de Agendamentos
   card: {
     marginBottom: 16,
-    backgroundColor: '#FFFFFF',
     borderRadius: 16,
     elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    borderWidth: 2,
-    borderColor: '#E8D6C9',
+    shadowOpacity: 0.16,
+    shadowRadius: 10,
+    borderWidth: 1,
     overflow: 'hidden',
   },
   cardEven: {
@@ -252,7 +290,6 @@ export const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   modalHeader: {
-    backgroundColor: '#A67B5B',
     paddingVertical: 20,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -265,6 +302,8 @@ export const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 24,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
 
   // Seções de Input

@@ -6,6 +6,13 @@
 const tintColorLight = '#0a7ea4';
 const tintColorDark = '#fff';
 
+const brandPrimary = '#1a0d8d';
+const brandSecondary = '#00d4ff';
+const brandAccent = '#A67B5B';
+const brandSurface = '#0b1a45';
+const brandSurfaceLight = '#12286b';
+const brandSurfaceLighter = '#1a317d';
+
 export const Colors = {
   light: {
     text: '#11181C',
@@ -14,6 +21,13 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    primary: brandPrimary,
+    secondary: brandSecondary,
+    accent: brandAccent,
+    surface: brandSurface,
+    surfaceLight: brandSurfaceLight,
+    surfaceLighter: brandSurfaceLighter,
+    textOnPrimary: '#FFF',
   },
   dark: {
     text: '#ECEDEE',
@@ -22,5 +36,12 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    primary: '#0c2e6f',
+    secondary: brandSecondary,
+    accent: brandAccent,
+    surface: brandSurface,
+    surfaceLight: brandSurfaceLight,
+    surfaceLighter: brandSurfaceLighter,
+    textOnPrimary: '#FFF',
   },
 };

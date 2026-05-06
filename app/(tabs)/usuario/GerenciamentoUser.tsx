@@ -25,6 +25,8 @@ import { styles } from './styles/GerenciamentoUserStyles';
 import useUserManagement from './hooks/useUserManagement';
 import { LinearGradient } from 'expo-linear-gradient';
 import API_URL from '../../../conf/api'; // Adicione esta importação
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 const GerenciamentoUser = () => {
   const {
     visible,
@@ -46,18 +48,47 @@ const GerenciamentoUser = () => {
     setUserPhoto
   } = useUserManagement();
 
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
+  const adminCount = users.filter(user => user.tipoUsuario === 0).length;
+  const clientCount = users.filter(user => user.tipoUsuario === 1).length;
+
   const getUserTypeText = (tipo: number) => {
     return tipo === 0 ? 'Administrador' : 'Cliente';
   };
 
   const getUserTypeColor = (tipo: number) => {
-    return tipo === 0 ? '#8B4513' : '#A67B5B';
+    return tipo === 0 ? theme.accent : theme.secondary;
   };
 
   return (
-    <LinearGradient colors={['#f7e7ce', '#D2B48C', '#A67B5B']} style={styles.gradientBackground}>
+    <LinearGradient
+      colors={[theme.primary, theme.surfaceLighter, theme.secondary]}
+      style={styles.gradientBackground}
+    >
       <PaperProvider>
         <SafeAreaView style={styles.container}>
+          <View style={styles.screenHeader}>
+            <Text style={styles.screenTitle}>Gerenciamento de Usuários</Text>
+            <Text style={styles.screenSubtitle}>
+              Controle de acessos, perfil e privilégios com um visual moderno e alinhado à marca.
+            </Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{filteredUsers.length}</Text>
+                <Text style={styles.statLabel}>Total</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{adminCount}</Text>
+                <Text style={styles.statLabel}>Administradores</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{clientCount}</Text>
+                <Text style={styles.statLabel}>Clientes</Text>
+              </View>
+            </View>
+          </View>
+
           <Image
             source={require('../../../assets/images/AirTrip.png')}
             style={styles.image}
@@ -68,7 +99,7 @@ const GerenciamentoUser = () => {
             mode="contained"
             onPress={() => showModal('addUser')}
             textColor="white"
-            buttonColor="#A67B5B"
+            buttonColor={theme.secondary}
             contentStyle={styles.addButtonContent}
             labelStyle={styles.addButtonLabel}
             style={styles.addButton}
@@ -82,9 +113,9 @@ const GerenciamentoUser = () => {
             value={searchQuery}
             onChangeText={text => setSearchQuery(text)}
             style={styles.searchInput}
-            outlineColor="#A67B5B"
-            activeOutlineColor="#8B4513"
-            left={<TextInput.Icon icon="magnify" color="#A67B5B" />}
+            outlineColor={theme.accent}
+            activeOutlineColor={theme.secondary}
+            left={<TextInput.Icon icon="magnify" color={theme.secondary} />}
           />
 
           <View style={styles.titleContainer}>
@@ -98,10 +129,17 @@ const GerenciamentoUser = () => {
           >
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user, index) => (
-                <Card key={user.id} style={[
-                  styles.card,
-                  index % 2 === 0 ? styles.cardEven : styles.cardOdd
-                ]}>
+                <Card
+                  key={user.id}
+                  style={[
+                    styles.card,
+                    {
+                      backgroundColor: theme.surface,
+                      borderColor: theme.surfaceLighter,
+                    },
+                    index % 2 === 0 ? styles.cardEven : styles.cardOdd,
+                  ]}
+                >
                   <Card.Content style={styles.cardContent}>
                     <View style={styles.cardHeader}>
                       <Avatar.Text
@@ -141,7 +179,7 @@ const GerenciamentoUser = () => {
                         setCurrentUser(user);
                         showModal('editUser');
                       }}
-                      style={styles.editButton}
+                      style={[styles.editButton, { backgroundColor: theme.secondary }]}
                       labelStyle={styles.buttonLabel}
                       contentStyle={styles.buttonContent}
                     >
@@ -206,9 +244,9 @@ const GerenciamentoUser = () => {
                           value={newUser.nome}
                           onChangeText={text => setNewUser(prev => ({ ...prev, nome: text }))}
                           style={styles.inputField}
-                          outlineColor="#A67B5B"
-                          activeOutlineColor="#8B4513"
-                          left={<TextInput.Icon icon="account" color="#A67B5B" />}
+                          outlineColor={theme.accent}
+                          activeOutlineColor={theme.secondary}
+                          left={<TextInput.Icon icon="account" color={theme.secondary} />}
                         />
                         <TextInput
                           label="Email"
@@ -216,9 +254,9 @@ const GerenciamentoUser = () => {
                           value={newUser.email}
                           onChangeText={text => setNewUser(prev => ({ ...prev, email: text }))}
                           style={styles.inputField}
-                          outlineColor="#A67B5B"
-                          activeOutlineColor="#8B4513"
-                          left={<TextInput.Icon icon="email" color="#A67B5B" />}
+                          outlineColor={theme.accent}
+                          activeOutlineColor={theme.secondary}
+                          left={<TextInput.Icon icon="email" color={theme.secondary} />}
                         />
                         <TextInput
                           label="Senha"
@@ -227,19 +265,19 @@ const GerenciamentoUser = () => {
                           value={newUser.senha}
                           onChangeText={text => setNewUser(prev => ({ ...prev, senha: text }))}
                           style={styles.inputField}
-                          outlineColor="#A67B5B"
-                          activeOutlineColor="#8B4513"
-                          left={<TextInput.Icon icon="lock" color="#A67B5B" />}
+                          outlineColor={theme.accent}
+                          activeOutlineColor={theme.secondary}
+                          left={<TextInput.Icon icon="lock" color={theme.secondary} />}
                         />
 
                         <View style={styles.pickerContainer}>
                           <Text style={styles.pickerLabel}>Tipo de Usuário</Text>
-                          <View style={styles.pickerWrapper}>
+                          <View style={[styles.pickerWrapper, { borderColor: theme.accent }]}> 
                             <Picker
                               selectedValue={newUser.tipoUsuario}
                               onValueChange={itemValue => setNewUser(prev => ({ ...prev, tipoUsuario: itemValue }))}
                               style={styles.picker}
-                              dropdownIconColor="#A67B5B"
+                              dropdownIconColor={theme.secondary}
                             >
                               <Picker.Item label="Administrador" value={0} />
                               <Picker.Item label="Cliente" value={1} />
@@ -269,8 +307,8 @@ const GerenciamentoUser = () => {
                             <Button
                               mode="outlined"
                               onPress={() => setUserPhoto(null)}
-                              style={styles.removePhotoButton}
-                              textColor="#8B4513"
+                              style={[styles.removePhotoButton, { borderColor: theme.secondary }]}
+                              textColor={theme.secondary}
                               icon="close"
                             >
                               Remover Foto
@@ -284,7 +322,7 @@ const GerenciamentoUser = () => {
                       <Button
                         mode="contained"
                         onPress={addUser}
-                        style={styles.modalActionButton}
+                        style={[styles.modalActionButton, { backgroundColor: theme.secondary }]}
                         contentStyle={styles.modalButtonContent}
                         labelStyle={styles.modalButtonLabel}
                       >
@@ -317,7 +355,7 @@ const GerenciamentoUser = () => {
                   showsVerticalScrollIndicator={false}
                 >
                   <View style={styles.modalContainer}>
-                    <View style={styles.modalHeader}>
+<View style={[styles.modalHeader, { backgroundColor: theme.secondary }]}> 
                       <Text style={styles.modalTitle}>Editar Usuário</Text>
                     </View>
 
@@ -329,8 +367,8 @@ const GerenciamentoUser = () => {
                           value={currentUser?.nome || ''}
                           onChangeText={text => setCurrentUser(prev => prev ? { ...prev, nome: text } : null)}
                           style={styles.inputField}
-                          outlineColor="#A67B5B"
-                          activeOutlineColor="#8B4513"
+                          outlineColor={theme.accent}
+                          activeOutlineColor={theme.secondary}
                         />
                         <TextInput
                           label="Email"
@@ -338,8 +376,8 @@ const GerenciamentoUser = () => {
                           value={currentUser?.email || ''}
                           onChangeText={text => setCurrentUser(prev => prev ? { ...prev, email: text } : null)}
                           style={styles.inputField}
-                          outlineColor="#A67B5B"
-                          activeOutlineColor="#8B4513"
+                          outlineColor={theme.accent}
+                          activeOutlineColor={theme.secondary}
                         />
                         <TextInput
                           label="Senha"
@@ -348,8 +386,8 @@ const GerenciamentoUser = () => {
                           value={currentUser?.senha || ''}
                           onChangeText={text => setCurrentUser(prev => prev ? { ...prev, senha: text } : null)}
                           style={styles.inputField}
-                          outlineColor="#A67B5B"
-                          activeOutlineColor="#8B4513"
+                          outlineColor={theme.accent}
+                          activeOutlineColor={theme.secondary}
                         />
 
                         <View style={styles.pickerContainer}>
@@ -365,7 +403,7 @@ const GerenciamentoUser = () => {
                                 tipoUsuario: itemValue
                               })}
                               style={styles.picker}
-                              dropdownIconColor="#A67B5B"
+                              dropdownIconColor={theme.secondary}
                             >
                               <Picker.Item label="Administrador" value={0} />
                               <Picker.Item label="Cliente" value={1} />
@@ -419,7 +457,7 @@ const GerenciamentoUser = () => {
                       <Button
                         mode="contained"
                         onPress={updateUser}
-                        style={styles.modalActionButton}
+                        style={[styles.modalActionButton, { backgroundColor: theme.secondary }]}
                         contentStyle={styles.modalButtonContent}
                         labelStyle={styles.modalButtonLabel}
                       >

@@ -24,6 +24,8 @@ import { Picker } from '@react-native-picker/picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 import { styles } from './styles/GerenciamentoAgendamentoStyles';
 import { useGerenciamentoAgendamento } from './hooks/useGerenciamentoAgendamento';
@@ -62,6 +64,23 @@ const GerenciamentoAgendamento = () => {
     hideModal,
     onChangeDate,
   } = useGerenciamentoAgendamento();
+
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
+
+  const agendamentosHoje = agendamentos.filter((agendamento) => {
+    const now = new Date();
+    const [day, month, year] = agendamento.dataAtendimento?.split('/') || [];
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return date.toDateString() === now.toDateString();
+  }).length;
+
+  const agendamentosFuturos = agendamentos.filter((agendamento) => {
+    const now = new Date();
+    const [day, month, year] = agendamento.dataAtendimento?.split('/') || [];
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    return date > now;
+  }).length;
 
   const formatDate = (dateString: string) => {
     if (!dateString) return '--/--/----';
@@ -111,9 +130,29 @@ const GerenciamentoAgendamento = () => {
   };
 
   return (
-    <LinearGradient colors={['#f7e7ce', '#D2B48C', '#A67B5B']} style={styles.gradientBackground}>
+    <LinearGradient colors={[theme.primary, theme.surfaceLighter, theme.secondary]} style={styles.gradientBackground}>
       <PaperProvider>
         <SafeAreaView style={styles.container}>
+          <View style={styles.screenHeader}>
+            <Text style={styles.screenTitle}>Gerenciar Agendamentos</Text>
+            <Text style={styles.screenSubtitle}>
+              Organize horários, acompanhe status e mantenha a operação alinhada ao estilo do AirTrip.
+            </Text>
+            <View style={styles.statsRow}>
+              <View style={[styles.statCard, { backgroundColor: theme.surfaceLighter }]}> 
+                <Text style={styles.statNumber}>{agendamentos.length}</Text>
+                <Text style={styles.statLabel}>Total</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: theme.surfaceLighter }]}> 
+                <Text style={styles.statNumber}>{agendamentosHoje}</Text>
+                <Text style={styles.statLabel}>Hoje</Text>
+              </View>
+              <View style={[styles.statCard, { backgroundColor: theme.surfaceLighter }]}> 
+                <Text style={styles.statNumber}>{agendamentosFuturos}</Text>
+                <Text style={styles.statLabel}>Futuros</Text>
+              </View>
+            </View>
+          </View>
 
           <Image 
             source={require('../../../assets/images/AirTrip.png')} 
@@ -125,7 +164,7 @@ const GerenciamentoAgendamento = () => {
             mode="contained"
             onPress={() => showModal('addAgendamento')}
             textColor="white"
-            buttonColor="#A67B5B"
+            buttonColor={theme.secondary}
             contentStyle={styles.addButtonContent}
             labelStyle={styles.addButtonLabel}
             style={styles.addButton}
@@ -139,9 +178,9 @@ const GerenciamentoAgendamento = () => {
             value={searchQuery}
             onChangeText={text => setSearchQuery(text)}
             style={styles.searchInput}
-            outlineColor="#A67B5B"
-            activeOutlineColor="#8B4513"
-            left={<TextInput.Icon icon="magnify" color="#A67B5B" />}
+            outlineColor={theme.accent}
+            activeOutlineColor={theme.secondary}
+            left={<TextInput.Icon icon="magnify" color={theme.secondary} />}
           />
 
           <View style={styles.titleContainer}>
@@ -160,6 +199,10 @@ const GerenciamentoAgendamento = () => {
               agendamentos.map((agendamento, index) => (
                 <Card key={agendamento.id} style={[
                   styles.card,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.surfaceLighter,
+                  },
                   index % 2 === 0 ? styles.cardEven : styles.cardOdd
                 ]}>
                   <Card.Content style={styles.cardContent}>
@@ -167,7 +210,7 @@ const GerenciamentoAgendamento = () => {
                       <Avatar.Icon 
                         size={60} 
                         icon={getServiceIcon(agendamento.tipoServico || '')} 
-                        style={[styles.serviceAvatar, { backgroundColor: '#A67B5B' }]}
+                        style={[styles.serviceAvatar, { backgroundColor: theme.accent }]}
                         color="white"
                       />
                       <View style={styles.agendamentoInfo}>
@@ -282,11 +325,11 @@ const GerenciamentoAgendamento = () => {
                   showsVerticalScrollIndicator={false}
                 >
                   <View style={styles.modalContainer}>
-                    <View style={styles.modalHeader}>
+                    <View style={[styles.modalHeader, { backgroundColor: theme.secondary }]}> 
                       <Text style={styles.modalTitle}>Novo Agendamento</Text>
                     </View>
                     
-                    <View style={styles.modalContent}>
+                    <View style={[styles.modalContent, { backgroundColor: theme.surface }]}> 
                       <View style={styles.inputSection}>
                         <Text style={styles.sectionLabel}>📅 Data do Atendimento</Text>
                         <TouchableOpacity 
@@ -303,7 +346,7 @@ const GerenciamentoAgendamento = () => {
                             <IconButton
                               icon="calendar"
                               size={20}
-                              iconColor="#A67B5B"
+                              iconColor={theme.secondary}
                             />
                           </View>
                         </TouchableOpacity>
@@ -327,7 +370,7 @@ const GerenciamentoAgendamento = () => {
                               setNewAgendamento((prev) => ({ ...prev, horario: itemValue }))
                             }
                             style={styles.picker}
-                            dropdownIconColor="#A67B5B"
+                            dropdownIconColor={theme.secondary}
                           >
                             <Picker.Item label="Selecione um horário" value="" />
                             {horarios.map((horario, index) => (
@@ -354,7 +397,7 @@ const GerenciamentoAgendamento = () => {
                               }));
                             }}
                             style={styles.picker}
-                            dropdownIconColor="#A67B5B"
+                            dropdownIconColor={theme.secondary}
                           >
                             <Picker.Item label="Selecione um serviço" value="" />
                             {servicos.map((servico) => (
@@ -398,7 +441,7 @@ const GerenciamentoAgendamento = () => {
                       <Button 
                         mode="contained" 
                         onPress={addAgendamento} 
-                        style={styles.modalActionButton}
+                        style={[styles.modalActionButton, { backgroundColor: theme.secondary }]}
                         contentStyle={styles.modalButtonContent}
                         labelStyle={styles.modalButtonLabel}
                         disabled={!newAgendamento.dataAtendimento || !newAgendamento.horario || !newAgendamento.fk_servico_id}
@@ -420,7 +463,7 @@ const GerenciamentoAgendamento = () => {
               contentContainerStyle={styles.modalOverlay}
             >
               <View style={styles.modalContainer}>
-                <View style={styles.modalHeader}>
+<View style={[styles.modalHeader, { backgroundColor: theme.secondary }]}> 
                   <Text style={styles.modalTitle}>Editar Agendamento</Text>
                 </View>
                 
@@ -462,7 +505,7 @@ const GerenciamentoAgendamento = () => {
                         <IconButton
                           icon="calendar"
                           size={20}
-                          iconColor="#A67B5B"
+                          iconColor={theme.secondary}
                         />
                       </View>
                     </TouchableOpacity>
@@ -498,7 +541,7 @@ const GerenciamentoAgendamento = () => {
                           );
                         }}
                         style={styles.picker}
-                        dropdownIconColor="#A67B5B"
+                        dropdownIconColor={theme.secondary}
                       >
                         <Picker.Item label="Selecione um horário" value="" />
                         {horarios.map((horario, index) => (
@@ -520,7 +563,7 @@ const GerenciamentoAgendamento = () => {
                           );
                         }}
                         style={styles.picker}
-                        dropdownIconColor="#A67B5B"
+                        dropdownIconColor={theme.secondary}
                       >
                         <Picker.Item label="Selecione um serviço" value="" />
                         {servicos.map((servico) => (
@@ -539,7 +582,7 @@ const GerenciamentoAgendamento = () => {
                   <Button 
                     mode="contained" 
                     onPress={validateAndUpdateAgendamento} 
-                    style={styles.modalActionButton}
+                    style={[styles.modalActionButton, { backgroundColor: theme.secondary }]}
                     contentStyle={styles.modalButtonContent}
                     labelStyle={styles.modalButtonLabel}
                   >
@@ -558,7 +601,7 @@ const GerenciamentoAgendamento = () => {
               contentContainerStyle={styles.modalOverlay}
             >
               <View style={styles.modalContainer}>
-                <View style={styles.modalHeader}>
+                <View style={[styles.modalHeader, { backgroundColor: theme.secondary }]}> 
                   <Text style={styles.modalTitle}>Cancelar Agendamento</Text>
                 </View>
                 
@@ -595,16 +638,16 @@ const GerenciamentoAgendamento = () => {
                   <Button 
                     mode="outlined" 
                     onPress={() => hideModal('deleteAgendamento')} 
-                    style={styles.cancelButton}
+                    style={[styles.cancelButton, { borderColor: theme.secondary }]}
                     contentStyle={styles.modalButtonContent}
-                    labelStyle={styles.cancelButtonLabel}
+                    labelStyle={[styles.cancelButtonLabel, { color: theme.secondary }]}
                   >
                     Manter Agendamento
                   </Button>
                   <Button 
                     mode="contained" 
                     onPress={deleteAgendamento}
-                    style={styles.confirmDeleteButton}
+                    style={[styles.confirmDeleteButton, { backgroundColor: theme.accent }]}
                     contentStyle={styles.modalButtonContent}
                     labelStyle={styles.modalButtonLabel}
                   >

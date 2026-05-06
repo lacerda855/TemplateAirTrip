@@ -38,11 +38,22 @@ const Stack = createStackNavigator();
 ======================= */
 function Tabs() {
   const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
 
   return (
     <TabNavigator.Navigator
       initialRouteName="Home"
       screenOptions={({ route }: { route: RouteProp<any, any> }) => ({
+        tabBarActiveTintColor: theme.secondary,
+        tabBarInactiveTintColor: '#c3d9ff',
+        tabBarStyle: {
+          backgroundColor: theme.surface,
+          borderTopColor: 'rgba(255,255,255,0.08)',
+        },
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '600',
+        },
         tabBarIcon: ({ color, size }) => {
           switch (route.name) {
             case 'Home':
@@ -82,6 +93,7 @@ function Tabs() {
 ======================= */
 export default function DrawerLayout() {
   const colorScheme = useColorScheme() as ColorScheme;
+  const theme = Colors[colorScheme];
 
   const [userType, setUserType] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -94,21 +106,60 @@ export default function DrawerLayout() {
 
   if (loading) return null;
 
+  const getDrawerIcon = (routeName: string, color: string, size: number) => {
+    switch (routeName) {
+      case 'Home':
+        return <MaterialIcons name="home" size={size} color={color} />;
+      case 'GerenciamentoUser':
+        return <Ionicons name="people" size={size} color={color} />;
+      case 'GerenciamentoAgendamento':
+      case 'GerenciamentoAgendamentoUser':
+        return <MaterialIcons name="event" size={size} color={color} />;
+      case 'GerenciamentoServico':
+        return <MaterialIcons name="build" size={size} color={color} />;
+      case 'Relatorio':
+        return <MaterialIcons name="analytics" size={size} color={color} />;
+      case 'AlterarSenha':
+      case 'RedefinirSenha':
+        return <MaterialIcons name="lock" size={size} color={color} />;
+      case 'Buscar Voos':
+      case 'CadastroAtendimento':
+        return <MaterialIcons name="flight-takeoff" size={size} color={color} />;
+      case 'Sobre':
+        return <MaterialIcons name="info" size={size} color={color} />;
+      default:
+        return <MaterialIcons name="arrow-right" size={size} color={color} />;
+    }
+  };
+
   return (
     <DrawerNavigator.Navigator
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={({ navigation }) => ({
+      screenOptions={({ navigation, route }) => ({
         drawerStyle: {
-          backgroundColor: '#1a0d8d',
-          width: 280,
+          backgroundColor: theme.surface,
+          width: 300,
         },
-        // bright cyan for selected items
-        drawerActiveTintColor: '#00d4ff',
-        // softer blue for unselected
-        drawerInactiveTintColor: '#9ab8d9',
+        drawerContentContainerStyle: {
+          paddingTop: 0,
+        },
+        overlayColor: 'rgba(0, 0, 0, 0.35)',
+        drawerActiveTintColor: theme.secondary,
+        drawerInactiveTintColor: '#b8d6ff',
+        drawerActiveBackgroundColor: 'rgba(0, 212, 255, 0.18)',
+        drawerLabelStyle: {
+          fontSize: 15,
+          fontWeight: '600',
+        },
+        drawerItemStyle: {
+          borderRadius: 14,
+          marginHorizontal: 10,
+          marginVertical: 4,
+        },
+        drawerIcon: ({ color, size }) => getDrawerIcon(route.name, color, size),
         headerLeft: () => (
           <Pressable onPress={() => navigation.toggleDrawer()} style={{ marginLeft: 15 }}>
-            <MaterialIcons name="menu" size={28} color="#00d4ff" />
+            <MaterialIcons name="menu" size={28} color={theme.secondary} />
           </Pressable>
         ),
       })}
