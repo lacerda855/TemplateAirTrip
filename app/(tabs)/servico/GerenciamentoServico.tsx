@@ -24,6 +24,8 @@ import {
 import { styles } from '../servico/styles/GerenciamentoServicoStyles';
 import { useGerenciamentoServico } from './hooks/useGerenciamentoServico';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { Colors } from '@/constants/Colors';
 
 const GerenciamentoServico = () => {
   const {
@@ -47,6 +49,9 @@ const GerenciamentoServico = () => {
     hideModal,
   } = useGerenciamentoServico();
 
+  const colorScheme = useColorScheme();
+  const theme = Colors[colorScheme];
+
   const formatCurrency = (value: string) => {
     if (!value) return 'R$ 0,00';
     const number = parseFloat(value.replace(/\D/g, '')) / 100;
@@ -55,6 +60,8 @@ const GerenciamentoServico = () => {
       currency: 'BRL'
     }).format(number);
   };
+
+  const serviceCategoryCount = new Set(services.map(service => service.tiposervico)).size;
 
   const getServiceIcon = (serviceType: string) => {
     const icons: { [key: string]: string } = {
@@ -79,9 +86,26 @@ const GerenciamentoServico = () => {
   };
 
   return (
-    <LinearGradient colors={['#f7e7ce', '#D2B48C', '#A67B5B']} style={styles.gradientBackground}>
+    <LinearGradient colors={[theme.primary, theme.surfaceLighter, theme.secondary]} style={styles.gradientBackground}>
       <PaperProvider>
         <SafeAreaView style={styles.container}>
+          <View style={styles.screenHeader}>
+            <Text style={styles.screenTitle}>Gerenciamento de Serviços</Text>
+            <Text style={styles.screenSubtitle}>
+              Organize e edite seus serviços com um visual consistente ao app.
+            </Text>
+            <View style={styles.statsRow}>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{services.length}</Text>
+                <Text style={styles.statLabel}>Total</Text>
+              </View>
+              <View style={styles.statCard}>
+                <Text style={styles.statNumber}>{serviceCategoryCount}</Text>
+                <Text style={styles.statLabel}>Categorias</Text>
+              </View>
+            </View>
+          </View>
+
           <Image
             source={require('../../../assets/images/AirTrip.png')}
             style={styles.image}
@@ -92,7 +116,7 @@ const GerenciamentoServico = () => {
             mode="contained"
             onPress={() => showModal('addService')}
             textColor="white"
-            buttonColor="#A67B5B"
+            buttonColor={theme.secondary}
             contentStyle={styles.addButtonContent}
             labelStyle={styles.addButtonLabel}
             style={styles.addButton}
@@ -107,9 +131,9 @@ const GerenciamentoServico = () => {
             value={searchQuery}
             onChangeText={text => setSearchQuery(text)}
             style={styles.searchInput}
-            outlineColor="#A67B5B"
-            activeOutlineColor="#8B4513"
-            left={<TextInput.Icon icon="magnify" color="#A67B5B" />}
+            outlineColor={theme.accent}
+            activeOutlineColor={theme.secondary}
+            left={<TextInput.Icon icon="magnify" color={theme.secondary} />}
           />
 
           {/* Título da Seção */}
@@ -126,6 +150,10 @@ const GerenciamentoServico = () => {
               services.map((service, index) => (
                 <Card key={service.id} style={[
                   styles.card,
+                  {
+                    backgroundColor: theme.surface,
+                    borderColor: theme.surfaceLighter,
+                  },
                   index % 2 === 0 ? styles.cardEven : styles.cardOdd
                 ]}>
                   <Card.Content style={styles.cardContent}>
@@ -173,7 +201,7 @@ const GerenciamentoServico = () => {
                         setCurrentService(service);
                         showModal('editService');
                       }}
-                      style={styles.editButton}
+                      style={[styles.editButton, { backgroundColor: theme.secondary }]}
                       labelStyle={styles.buttonLabel}
                       contentStyle={styles.buttonContent}
                     >
